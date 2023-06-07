@@ -1,5 +1,6 @@
 package com.example.weatherapi_project;
 
+import com.sun.tools.javac.Main;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.awt.*;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootApplication
@@ -41,35 +42,60 @@ public class WeatherApiProjectApplication {
             RainfallData rainfallData = response.getRainfall();
             double rainfall = (rainfallData != null) ? rainfallData.getOneHour() : 0.0;
 
-
             String output = "Weather in " + city + ": " + weather + "\n";
             output += "Temperature: " + temperature + "°C\n";
             output += "Humidity: " + humidity + "%\n";
             output += "Pressure: " + pressure + " hPa\n";
             output += "Wind Speed: " + windSpeed + " m/s\n";
             output += "Rainfall (1 hour): " + rainfall + " mm";
-
             System.out.println(output);
-
-            openWebpage(apiUrl); // Otwórz adres w przeglądarce
-
+            openWebpage(weather,temperature, humidity, pressure, windSpeed, rainfall);
             return output;
+
         } else {
             return "Error while retrieving weather information.";
         }
     }
-    public static void openWebpage(String url) {
+    public void openWebpage(String weather,double temperature, int humidity, double pressure, double windSpeed, double rainfall ) {
         try {
-            String htmlContent = "<html><head><title>Pogoda we Wrocławiu!</title></head><body><h1 style='text-align:center;'>Pogoda we Wrocławiu!</h1><p>API pogodowe: " + url + "</p></body></html>";
-            String tempFileName = "temp.html";
-            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFileName));
-            writer.write(htmlContent);
-            writer.close();
+            String htmlContent = generateHtmlContent(weather, temperature, humidity, pressure, windSpeed, rainfall);
+            String tempFileName = "pogoda";
 
-            Desktop desktop = Desktop.getDesktop();
-            desktop.browse(new URI("file://" + tempFileName));
+            Path tempFilePath = Files.createTempFile(tempFileName, ".html");
+            List<String> lines = new ArrayList<>();
+            lines.add(htmlContent);
+            Files.write(tempFilePath, lines, StandardOpenOption.WRITE);
+
+            String os = System.getProperty("os.name").toLowerCase();
+
+            if (os.contains("win")) {
+                Runtime.getRuntime().exec("cmd /c start " + tempFilePath.toAbsolutePath());
+            } else if (os.contains("mac")) {
+                Runtime.getRuntime().exec("open " + tempFilePath.toAbsolutePath());
+            } else if (os.contains("nix") || os.contains("nux")) {
+                Runtime.getRuntime().exec("xdg-open " + tempFilePath.toAbsolutePath());
+            } else {
+                System.out.println("Cannot open the webpage on this operating system.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    public String generateHtmlContent(String weather,double temperature, int humidity, double pressure, double windSpeed, double rainfall ) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html><head><title>Pogoda we Wrocławiu!</title></head><body>");
+        sb.append("<h1 style='text-align:center;'>Pogoda we Wrocławiu!</h1>");
+
+        sb.append("<h2>Aktualne warunki pogodowe:</h2>");
+        sb.append("<p>Temperatura: " + temperature + " °C</p>");
+        sb.append("<p>Wilgotność: " + humidity + "%</p>");
+        sb.append("<p>Ciśnienie: " + pressure + " hPa</p>");
+        sb.append("<p>Prędkość wiatru: " + windSpeed + " m/s</p>");
+        sb.append("<p>Opady deszczu: " + rainfall + " mm</p>");
+        sb.append("<p>Opis pogody: " + weather + "</p>");
+        sb.append("</body></html>");
+        return sb.toString();
+    }
+
 }
