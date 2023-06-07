@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Math;
 
 @SpringBootApplication
 @RestController
@@ -43,7 +44,7 @@ public class WeatherApiProjectApplication {
             double rainfall = (rainfallData != null) ? rainfallData.getOneHour() : 0.0;
 
             String output = "Weather in " + city + ": " + weather + "\n";
-            output += "Temperature: " + temperature + "°C\n";
+            output += "Temperature: " + Math.round(temperature) + "°C\n";
             output += "Humidity: " + humidity + "%\n";
             output += "Pressure: " + pressure + " hPa\n";
             output += "Wind Speed: " + windSpeed + " m/s\n";
@@ -84,11 +85,16 @@ public class WeatherApiProjectApplication {
 
     public String generateHtmlContent(String weather,double temperature, int humidity, double pressure, double windSpeed, double rainfall ) {
         StringBuilder sb = new StringBuilder();
-        sb.append("<html><head><title>Pogoda we Wrocławiu!</title></head><body>");
+        //String s = "res/clearsky.jpg";
+        sb.append("<html><head><title>Pogoda we Wrocławiu!</title></head><style>    \n" +
+                "body {    \n" +
+                "  background-image: url(\"res/clearsky.jpg\");  \n" +
+                "  }  \n" +
+                "</style><body>");
         sb.append("<h1 style='text-align:center;'>Pogoda we Wrocławiu!</h1>");
 
         sb.append("<h2>Aktualne warunki pogodowe:</h2>");
-        sb.append("<p>Temperatura: " + temperature + " °C</p>");
+        sb.append("<p>Temperatura: " + Math.round(temperature) + " °C</p>");
         sb.append("<p>Wilgotność: " + humidity + "%</p>");
         sb.append("<p>Ciśnienie: " + pressure + " hPa</p>");
         sb.append("<p>Prędkość wiatru: " + windSpeed + " m/s</p>");
