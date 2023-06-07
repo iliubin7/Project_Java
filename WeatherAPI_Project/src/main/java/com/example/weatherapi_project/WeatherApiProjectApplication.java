@@ -60,11 +60,6 @@ public class WeatherApiProjectApplication {
     }
     public static void openWebpage(String url) {
         try {
-            if (GraphicsEnvironment.isHeadless()) {
-                System.out.println("Running in headless mode. Unable to open webpage.");
-                return;
-            }
-
             String htmlContent = "<html><head><title>Pogoda we Wrocławiu!</title></head><body><h1 style='text-align:center;'>Pogoda we Wrocławiu!</h1><p>API pogodowe: " + url + "</p></body></html>";
             String tempFileName = "temp.html";
             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFileName));
