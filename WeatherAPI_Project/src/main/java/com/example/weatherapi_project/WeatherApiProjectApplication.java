@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.awt.Desktop;
+import java.net.URI;
+import java.util.List;
+
 @SpringBootApplication
 @RestController
 public class WeatherApiProjectApplication {
@@ -24,18 +28,37 @@ public class WeatherApiProjectApplication {
         OpenWeatherMapResponse response = restTemplate.getForObject(apiUrl, OpenWeatherMapResponse.class);
 
         if (response != null) {
+            List<WeatherDescription> weatherDescriptions = response.getWeather();
+            MainWeatherData mainWeatherData = response.getMain();
             String weather = response.getWeather().get(0).getDescription();
             double temperature = response.getMain().getTemp();
             int humidity = response.getMain().getHumidity();
+            double pressure = mainWeatherData.getPressure();
+            double windSpeed = response.getWind().getSpeed();
+            double rainfall = response.getRainfall().getOneHour();
 
             String output = "Weather in " + city + ": " + weather + "\n";
             output += "Temperature: " + temperature + "°C\n";
             output += "Humidity: " + humidity + "%";
+            output += "Pressure: " + pressure + " hPa\n";
+            output += "Wind Speed: " + windSpeed + " m/s\n";
+            output += "Rainfall (1 hour): " + rainfall + " mm";
 
             System.out.println(output);
+
+            openWebpage(apiUrl); // Otwórz adres w przeglądarce
+
             return output;
         } else {
             return "Error while retrieving weather information.";
+        }
+    }
+    public static void openWebpage(String url) {
+        try {
+            Desktop desktop = Desktop.getDesktop();
+            desktop.browse(new URI(url));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

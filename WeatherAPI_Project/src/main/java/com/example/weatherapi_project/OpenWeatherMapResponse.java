@@ -12,19 +12,27 @@ public class OpenWeatherMapResponse {
     @JsonProperty("main")
     private MainWeatherData main;
 
-    public List<WeatherDescription> getWeather() {
-        return weather;
+    @JsonProperty("wind")
+    private WindData wind;
+
+    @JsonProperty("rain")
+    private RainfallData rainfall;
+
+    public List<WeatherDescription> getWeather() {return weather;}
+
+    public void setWeather(List<WeatherDescription> weather) {this.weather = weather;}
+
+    public MainWeatherData getMain() {return main;}
+
+    public void setMain(MainWeatherData main) {this.main = main;}
+
+    public WindData getWind() {return wind;}
+
+    public void setWind(WindData wind) {
+        this.wind = wind;
     }
 
-    public void setWeather(List<WeatherDescription> weather) {
-        this.weather = weather;
-    }
+    public RainfallData getRainfall() {return rainfall;}
 
-    public MainWeatherData getMain() {
-        return main;
-    }
-
-    public void setMain(MainWeatherData main) {
-        this.main = main;
-    }
+    public void setRainfall(RainfallData rainfall) {this.rainfall = rainfall;}
 }
