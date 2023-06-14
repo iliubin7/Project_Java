@@ -1,13 +1,14 @@
 package com.example.weatherapi_project;
 
-import com.sun.tools.javac.Main;
+import jakarta.annotation.Resource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -24,19 +25,19 @@ public class WeatherApiProjectApplication {
     }
 
     @GetMapping("/weather")
-    public String Weatherinlocation(@RequestParam(value = "city", defaultValue = "Wroclaw") String city) {
+    public String weatherInLocation(@RequestParam(value = "city", defaultValue = "Wrocław") String city) {
         String apiKey = "001fe81a747f9ce8372d952add925bca";
 
         RestTemplate restTemplate = new RestTemplate();
         String apiUrl = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + apiKey;
         OpenWeatherMapResponse response = restTemplate.getForObject(apiUrl, OpenWeatherMapResponse.class);
 
-        if (response != null) {
+        if (response != null && response.getWeather() != null && !response.getWeather().isEmpty()) {
             List<WeatherDescription> weatherDescriptions = response.getWeather();
             MainWeatherData mainWeatherData = response.getMain();
             String weather = response.getWeather().get(0).getDescription();
             double temperature = response.getMain().getTemp() - 273.15;
-            temperature = Math.round(temperature * 100.0)/100.0;
+            temperature = Math.round(temperature * 100.0) / 100.0;
             int humidity = response.getMain().getHumidity();
             double pressure = mainWeatherData.getPressure();
             double windSpeed = response.getWind().getSpeed();
@@ -50,16 +51,17 @@ public class WeatherApiProjectApplication {
             output += "Wind Speed: " + windSpeed + " m/s\n";
             output += "Rainfall (1 hour): " + rainfall + " mm";
             System.out.println(output);
-            openWebpage(weather,temperature, humidity, pressure, windSpeed, rainfall);
+            this.openWebpage(city, weather, temperature, humidity, pressure, windSpeed, rainfall);
             return output;
 
         } else {
             return "Error while retrieving weather information.";
         }
     }
-    public void openWebpage(String weather,double temperature, int humidity, double pressure, double windSpeed, double rainfall ) {
+
+    public void openWebpage(String city, String weather, double temperature, int humidity, double pressure, double windSpeed, double rainfall) {
         try {
-            String htmlContent = generateHtmlContent(weather, temperature, humidity, pressure, windSpeed, rainfall);
+            String htmlContent = generateHtmlContent(city, weather, temperature, humidity, pressure, windSpeed, rainfall);
             String tempFileName = "pogoda";
 
             Path tempFilePath = Files.createTempFile(tempFileName, ".html");
@@ -83,25 +85,56 @@ public class WeatherApiProjectApplication {
         }
     }
 
-    public String generateHtmlContent(String weather,double temperature, int humidity, double pressure, double windSpeed, double rainfall ) {
-        StringBuilder sb = new StringBuilder();
-        //String s = "res/clearsky.jpg";
-        sb.append("<html><head><title>Pogoda we Wrocławiu!</title></head><style>    \n" +
-                "body {    \n" +
-                "  background-image: url(\"res/clearsky.jpg\");  \n" +
-                "  }  \n" +
-                "</style><body>");
-        sb.append("<h1 style='text-align:center;'>Pogoda we Wrocławiu!</h1>");
 
-        sb.append("<h2>Aktualne warunki pogodowe:</h2>");
-        sb.append("<p>Temperatura: " + Math.round(temperature) + " °C</p>");
-        sb.append("<p>Wilgotność: " + humidity + "%</p>");
-        sb.append("<p>Ciśnienie: " + pressure + " hPa</p>");
-        sb.append("<p>Prędkość wiatru: " + windSpeed + " m/s</p>");
-        sb.append("<p>Opady deszczu: " + rainfall + " mm</p>");
-        sb.append("<p>Opis pogody: " + weather + "</p>");
+
+    public String generateHtmlContent(String city, String weather, double temperature, int humidity, double pressure, double windSpeed, double rainfall) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html><head><title>Weather in " + city + "!</title>");
+        sb.append("<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css\">");
+        sb.append("<style>    \n");
+        sb.append("body {    \n");
+        sb.append("  background-image: url(\"/clearsky.jpg\");  \n");
+        sb.append("  }  \n");
+        sb.append("</style></head><body>");
+
+        sb.append("<h1 style='text-align:center;'>Weather in " + city + "!</h1>");
+
+        sb.append("<form method='POST' action='/weather'>");
+        sb.append("<label for='cityInput'>Enter city name:</label>");
+        sb.append("<input type='text' id='cityInput' name='city'>");
+        sb.append("<input type='submit' value='Get Weather'>");
+        sb.append("</form>");
+
+        sb.append("<h2>Current weather conditions:</h2>");
+
+        // Dodanie ikony pogodowej na podstawie warunków pogodowych
+        sb.append("<p><i class='" + getWeatherIconClass(weather) + "'></i> Weather: " + weather + "</p>");
+
+        sb.append("<p>Temperature: " + Math.round(temperature) + " °C</p>");
+        sb.append("<p>Humidity: " + humidity + "%</p>");
+        sb.append("<p>Pressure: " + pressure + " hPa</p>");
+        sb.append("<p>Wind Speed: " + windSpeed + " m/s</p>");
+        sb.append("<p>Rainfall (1 hour): " + rainfall + " mm</p>");
         sb.append("</body></html>");
         return sb.toString();
     }
+
+    public String getWeatherIconClass(String weather) {
+        // Mapowanie warunków pogodowych na odpowiednie klasy ikon z biblioteki Font Awesome
+        switch (weather) {
+            case "clear sky":
+                return "fas fa-sun";
+            case "Clouds":
+                return "fas fa-cloud";
+            case "Rain":
+                return "fas fa-cloud-showers-heavy";
+            case "Snow":
+                return "fas fa-snowflake";
+            default:
+                return "fas fa-question"; // Domyślna ikona dla nieznanych warunków
+        }
+    }
+
+
 
 }
