@@ -101,10 +101,11 @@ public class WeatherApiProjectApplication {
 
         sb.append("<h1 style='text-align:center;'>Weather in " + city + "!</h1>");
 
-        sb.append("<form method='POST' action='/weather'>");
-        sb.append("<label for='cityInput'>Enter city name:</label>");
-        sb.append("<input type='text' id='cityInput' name='city'>");
-        sb.append("<input type='submit' value='Get Weather'>");
+        sb.append("<form method=\"POST\" action=\"#\" th:action=\"@{/weather}\">");  // # sluzy do sygnalizowania, ze po wykonaniu akcji zostajemy na tej stronie
+        //sb.append("<action=\"#\" th:action=\"@{/weather}\" method=\"post\">");
+        sb.append("<label for=\"cityInput\">Enter city name:</label>");
+        sb.append("<input type=\"text\" id=\"cityInput\" name=\"city\">");
+        sb.append("<input type=\"submit\" value=\"Get Weather\">");
         sb.append("</form>");
 
         sb.append("<h2>Current weather conditions:</h2>");
