@@ -95,7 +95,7 @@ public class WeatherApiProjectApplication {
         sb.append("<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css\">");
         sb.append("<style>    \n");
         sb.append("body {    \n");
-        sb.append("  background-image: url(\"/clearsky.jpg\");  \n");
+        sb.append("  background-image: url(\"" + getWeatherBackground(weather) +  "\");  \n");
         sb.append("  }  \n");
         sb.append("</style></head><body>");
 
@@ -135,6 +135,24 @@ public class WeatherApiProjectApplication {
             default:
                 return "fas fa-question"; // Domyślna ikona dla nieznanych warunków
         }
+    }
+
+    public String getWeatherBackground(String weather)
+    {
+        // Mapowanie warunków pogodowych na odpowiednie zdjecia tla
+        switch (weather) {
+            case "clear sky":
+                return "https://www.seekpng.com/png/full/2-22588_cloud-background-free-download-sky-background-transparent-png.png";
+            case "Clouds":
+                return "https://s.yimg.com/ny/api/res/1.2/dZnLSTPciIYSK2Mvl9yYZQ--/YXBwaWQ9aGlnaGxhbmRlcjt3PTcwNTtjZj13ZWJw/https://media.zenfs.com/en/hoodline_545/aeded8b6efde8a4e2b2fa15edf1c2a1b";
+            case "Rain":
+                return "https://imgsrv2.voi.id/8Mb6U1RIl6ROvmryQxHwZUHfQF01lH82kS4rE0T0Mis/auto/1200/675/sm/1/bG9jYWw6Ly8vcHVibGlzaGVycy8zNDA1Mi8yMDIxMDIxOTAxMDEtbWFpbi5jcm9wcGVkXzE2MTM2NzEyOTguanBn.jpg";
+            case "Snow":
+                return "https://www.gannett-cdn.com/-mm-/454a0d0a2013412d158f08ab812536087d93bea8/c=0-193-1988-1316/local/-/media/2015/12/04/CNYGroup/Binghamton/635848220175976573-ThinkstockPhotos-462866769.jpg?width=2560";
+            default:
+                return "https://www.google.com/url?sa=i&url=https%3A%2F%2Fnewsonair.gov.in%2FNews%3Ftitle%3DWeather-forecast-for-Monday%26id%3D441932&psig=AOvVaw2Nff4Yln9CJbnEbqCP2YxS&ust=1686950156818000&source=images&cd=vfe&ved=0CBEQjRxqFwoTCJiGzZiZxv8CFQAAAAAdAAAAABAE"; // Domyślne tlo dla nieznanych warunków
+        }
+
     }
 
 
