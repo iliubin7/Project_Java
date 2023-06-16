@@ -1,6 +1,5 @@
 package com.example.weatherapi_project;
 
-import jakarta.annotation.Resource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.io.ClassPathResource;
@@ -46,48 +45,11 @@ public class WeatherApiProjectApplication {
             RainfallData rainfallData = response.getRainfall();
             double rainfall = (rainfallData != null) ? rainfallData.getOneHour() : 0.0;
 
-            String output = "Weather in " + city + ": " + weather + "\n";
-            output += "Temperature: " + Math.round(temperature) + "°C\n";
-            output += "Humidity: " + humidity + "%\n";
-            output += "Pressure: " + pressure + " hPa\n";
-            output += "Wind Speed: " + windSpeed + " m/s\n";
-            output += "Rainfall (1 hour): " + rainfall + " mm";
-            System.out.println(output);
-            this.openWebpage(city, weather, temperature, humidity, pressure, windSpeed, rainfall);
-            return output;
-
+            return generateHtmlContent(city, weather, temperature, humidity, pressure, windSpeed, rainfall);
         } else {
             return "Error while retrieving weather information.";
         }
     }
-
-    public void openWebpage(String city, String weather, double temperature, int humidity, double pressure, double windSpeed, double rainfall) {
-        try {
-            String htmlContent = generateHtmlContent(city, weather, temperature, humidity, pressure, windSpeed, rainfall);
-            String tempFileName = "pogoda";
-
-            Path tempFilePath = Files.createTempFile(tempFileName, ".html");
-            List<String> lines = new ArrayList<>();
-            lines.add(htmlContent);
-            Files.write(tempFilePath, lines, StandardOpenOption.WRITE);
-
-            String os = System.getProperty("os.name").toLowerCase();
-
-            if (os.contains("win")) {
-                Runtime.getRuntime().exec("cmd /c start " + tempFilePath.toAbsolutePath());
-            } else if (os.contains("mac")) {
-                Runtime.getRuntime().exec("open " + tempFilePath.toAbsolutePath());
-            } else if (os.contains("nix") || os.contains("nux")) {
-                Runtime.getRuntime().exec("xdg-open " + tempFilePath.toAbsolutePath());
-            } else {
-                System.out.println("Cannot open the webpage on this operating system.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
 
     public String generateHtmlContent(String city, String weather, double temperature, int humidity, double pressure, double windSpeed, double rainfall) {
         StringBuilder sb = new StringBuilder();
@@ -95,15 +57,17 @@ public class WeatherApiProjectApplication {
         sb.append("<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css\">");
         sb.append("<style>    \n");
         sb.append("body {    \n");
-        sb.append("  background-image: url(\"" + getWeatherBackground(weather) +  "\");  \n");
-        sb.append("  }  \n");
+        sb.append("  background-image: url(\"" + getWeatherBackground(weather) + "\");  \n");
+        sb.append("  background-repeat: no-repeat;  \n");
+        sb.append("  background-size: cover;  \n");
+        sb.append("}  \n");
         sb.append("</style></head><body>");
 
         sb.append("<h1 style='text-align:center;'>Weather in " + city + "!</h1>");
 
-        sb.append("<form method='POST' action='/weather'>");
+        sb.append("<form method='GET' action='/weather'>");
         sb.append("<label for='cityInput'>Enter city name:</label>");
-        sb.append("<input type='text' id='cityInput' name='city'>");
+        sb.append("<input type='text' id='cityInput' name='city' value='" + city + "'>");
         sb.append("<input type='submit' value='Get Weather'>");
         sb.append("</form>");
 
@@ -126,35 +90,72 @@ public class WeatherApiProjectApplication {
         switch (weather) {
             case "clear sky":
                 return "fas fa-sun";
-            case "Clouds":
+
+            case "few clouds":
+            case "scattered clouds":
+            case "broken clouds":
+            case "overcast clouds":
                 return "fas fa-cloud";
-            case "Rain":
+
+            case "moderate rain":
+            case "heavy intensity rain":
+            case "shower rain":
+            case "rain":
+            case "light rain":
+            case "thunderstorm":
                 return "fas fa-cloud-showers-heavy";
-            case "Snow":
+
+            case "snow":
                 return "fas fa-snowflake";
+
+            case "fog":
+            case "mist":
+            case "haze":
+            case "smoke":
             default:
-                return "fas fa-question"; // Domyślna ikona dla nieznanych warunków
+                return "fas fa-question";
         }
     }
 
-    public String getWeatherBackground(String weather)
-    {
+    public String getWeatherBackground(String weather) {
         // Mapowanie warunków pogodowych na odpowiednie zdjecia tla
         switch (weather) {
             case "clear sky":
-                return "https://www.seekpng.com/png/full/2-22588_cloud-background-free-download-sky-background-transparent-png.png";
-            case "Clouds":
-                return "https://s.yimg.com/ny/api/res/1.2/dZnLSTPciIYSK2Mvl9yYZQ--/YXBwaWQ9aGlnaGxhbmRlcjt3PTcwNTtjZj13ZWJw/https://media.zenfs.com/en/hoodline_545/aeded8b6efde8a4e2b2fa15edf1c2a1b";
-            case "Rain":
-                return "https://imgsrv2.voi.id/8Mb6U1RIl6ROvmryQxHwZUHfQF01lH82kS4rE0T0Mis/auto/1200/675/sm/1/bG9jYWw6Ly8vcHVibGlzaGVycy8zNDA1Mi8yMDIxMDIxOTAxMDEtbWFpbi5jcm9wcGVkXzE2MTM2NzEyOTguanBn.jpg";
-            case "Snow":
-                return "https://www.gannett-cdn.com/-mm-/454a0d0a2013412d158f08ab812536087d93bea8/c=0-193-1988-1316/local/-/media/2015/12/04/CNYGroup/Binghamton/635848220175976573-ThinkstockPhotos-462866769.jpg?width=2560";
+                return "https://images.pexels.com/photos/281260/pexels-photo-281260.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "few clouds":
+                return "https://images.pexels.com/photos/16226602/pexels-photo-16226602/free-photo-of-clouds-on-blue-sky-over-plains-with-forest.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "scattered clouds":
+                return "https://images.pexels.com/photos/8579644/pexels-photo-8579644.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "broken clouds":
+                return "https://images.pexels.com/photos/2886268/pexels-photo-2886268.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "overcast clouds":
+                return "https://images.pexels.com/photos/16222439/pexels-photo-16222439/free-photo-of-harvester-on-field-under-clouds.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "moderate rain":
+                return "https://images.pexels.com/photos/16118799/pexels-photo-16118799/free-photo-of-chodzenie-chodnik-deszcz-mokry.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "heavy intensity rain":
+                return "https://images.pexels.com/photos/1530423/pexels-photo-1530423.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "shower rain":
+                return "https://images.pexels.com/photos/1915182/pexels-photo-1915182.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "rain":
+                return "https://images.pexels.com/photos/1463530/pexels-photo-1463530.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "light rain":
+                return "https://images.pexels.com/photos/50677/rain-after-the-rain-a-drop-of-drop-of-rain-50677.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "fog":
+                return "https://images.pexels.com/photos/167699/pexels-photo-167699.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "thunderstorm":
+                return "https://images.pexels.com/photos/1162251/pexels-photo-1162251.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "mist":
+                return "https://images.pexels.com/photos/167699/pexels-photo-167699.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "haze":
+                return "https://images.pexels.com/photos/2529973/pexels-photo-2529973.jpeg?auto=compress&cs=tinysrgb&w=1600";
+            case "snow":
+                return "https://images.pexels.com/photos/3334585/pexels-photo-3334585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+            case "smoke":
+                return "";
             default:
-                return "https://www.google.com/url?sa=i&url=https%3A%2F%2Fnewsonair.gov.in%2FNews%3Ftitle%3DWeather-forecast-for-Monday%26id%3D441932&psig=AOvVaw2Nff4Yln9CJbnEbqCP2YxS&ust=1686950156818000&source=images&cd=vfe&ved=0CBEQjRxqFwoTCJiGzZiZxv8CFQAAAAAdAAAAABAE"; // Domyślne tlo dla nieznanych warunków
+                return "https://images.pexels.com/photos/1431822/pexels-photo-1431822.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"; // Domyślne tlo dla nieznanych warunków
         }
-
     }
-
-
-
 }
+
+
