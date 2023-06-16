@@ -129,7 +129,7 @@ public class WeatherApiProjectApplication {
             case "broken clouds":
                 return "https://images.pexels.com/photos/2886268/pexels-photo-2886268.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
             case "overcast clouds":
-                return "https://images.pexels.com/photos/16222439/pexels-photo-16222439/free-photo-of-harvester-on-field-under-clouds.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+                return "https://st4.depositphotos.com/32934536/39623/i/450/depositphotos_396235134-stock-photo-beautiful-bright-white-gray-clouds.jpg";
             case "moderate rain":
                 return "https://images.pexels.com/photos/16118799/pexels-photo-16118799/free-photo-of-chodzenie-chodnik-deszcz-mokry.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
             case "heavy intensity rain":
@@ -151,7 +151,7 @@ public class WeatherApiProjectApplication {
             case "snow":
                 return "https://images.pexels.com/photos/3334585/pexels-photo-3334585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
             case "smoke":
-                return "";
+                return "https://i.tribune.com.pk/media/images/1282292-fog-1483383408/1282292-fog-1483383408.jpg";
             default:
                 return "https://images.pexels.com/photos/1431822/pexels-photo-1431822.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"; // Domyślne tlo dla nieznanych warunków
         }
